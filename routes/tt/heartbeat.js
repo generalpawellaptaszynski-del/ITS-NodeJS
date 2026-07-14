@@ -10,6 +10,14 @@ function sendJson(res, status, payload) {
   res.status(status).send(JSON.stringify(payload));
 }
 
+function isDebugRequest(req) {
+  return req.query && (req.query.debug === '1' || req.query.debug === 'true');
+}
+
+function logSql(sql) {
+  console.log('[tt/heartbeat] SQL:', sql);
+}
+
 function parseDeviceId(value) {
   var devid = Number(value);
   return Number.isInteger(devid) && devid > 0 ? devid : null;
@@ -35,9 +43,16 @@ function heartbeat(req, res) {
     return sendJson(res, 400, {Result: 'ERROR', Message: 'Wrong device id'});
   }
 
-  db.query('CALL tt_heartbeat(?)', [devid], function(err, rows, fields){
+  var sql = mysql.format('CALL tt_heartbeat(?)', [devid]);
+  logSql(sql);
+
+  db.query(sql, function(err, rows, fields){
     if (err) {
-      return sendJson(res, 500, {Result: 'ERROR', Message: JSON.stringify(err)});
+      return sendJson(res, 500, {Result: 'ERROR', Message: JSON.stringify(err), SQL: isDebugRequest(req) ? sql : undefined});
+    }
+
+    if (isDebugRequest(req)) {
+      return sendJson(res, 200, {Result: 'Ok', SQL: sql});
     }
 
     sendJson(res, 200, {Result: 'Ok'});
@@ -55,10 +70,15 @@ function heartbeatChanged(req, res) {
     return sendJson(res, 400, {Result: 'ERROR', Message: 'Wrong tag list'});
   }
 
-  db.query('CALL tt_heartbeatChanged(?, ?)', [devid, tags], function(err, rows, fields){
+  var sql = mysql.format('CALL tt_heartbeatChanged(?, ?)', [devid, tags]);
+  logSql(sql);
+
+  db.query(sql, function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) {
-      res.status(500).send(JSON.stringify({Result: 'ERROR', Message: JSON.stringify(err)}));
+      res.status(500).send(JSON.stringify({Result: 'ERROR', Message: JSON.stringify(err), SQL: isDebugRequest(req) ? sql : undefined}));
+    } else if (isDebugRequest(req)) {
+      res.status(200).send(unidecode(JSON.stringify({Result: 'Ok', SQL: sql, Rows: rows})));
     } else {
       res.status(200).send(unidecode(JSON.stringify(rows)));
       //res.status(200).send(JSON.stringify(rows));
