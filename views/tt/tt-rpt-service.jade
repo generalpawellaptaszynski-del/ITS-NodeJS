@@ -1,0 +1,17 @@
+extends tt-layout
+
+block content
+  .tt-tree-scroll
+    table#tree-service
+      thead
+        tr
+          th
+          th Service time
+          th.td-setup
+            span.badge.badge-pill.badge-setup.tt-service-header-badge Setup
+          th.td-repair
+            span.badge.badge-pill.badge-repair.tt-service-header-badge Repair
+      tbody
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/tt/tt-rpt-service.js')

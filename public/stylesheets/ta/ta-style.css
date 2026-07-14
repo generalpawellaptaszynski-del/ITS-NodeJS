@@ -1,0 +1,58 @@
+#tree-report .its-tree-name {
+  display: table-cell;
+  text-align: right;
+}
+#fltr .tt-filter-action-cell {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  vertical-align: middle;
+  padding-left: 14px;
+  border-bottom: 1px solid #d6e0ec;
+}
+.tt-tree-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px 6px 10px;
+  border: 1px solid #c1cfe1;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff 0%, #eef4fb 100%);
+  box-shadow: 0 1px 2px rgba(48,90,160,0.08);
+  color: #17324d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.tt-tree-action-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #f7fbff 0%, #ddeafb 100%);
+  border-color: #9ec8ef;
+}
+.tt-tree-action-btn:disabled,
+.tt-tree-action-btn.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.tt-tree-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #4f87c7;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12);
+}
+.tt-tree-action-btn:disabled .tt-tree-action-icon,
+.tt-tree-action-btn.is-disabled .tt-tree-action-icon {
+  background: #8ba3bd;
+}

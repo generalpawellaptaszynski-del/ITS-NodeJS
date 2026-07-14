@@ -1,0 +1,41 @@
+
+div.navbar
+
+  div.dropdown(data-site-group='HR')
+    button.dropbtn(type='button' aria-expanded='false') HR
+    div.dropdown-content
+      a(href='/worker' data-site-group='HR') Employees
+      a(href='/ta/ta-event' data-site-group='HR') Time Attendance
+
+  div.dropdown(data-site-group='PRODUCTION')
+    button.dropbtn(type='button' aria-expanded='false') PRODUCTION
+    div.dropdown-content
+      a(href='/tt/tt-adm-map'   data-site-group='PRODUCTION') W.Places
+      a(href='/tt/tt-product-new' data-site-group='PRODUCTION') Products
+      a(href='/tt/tt-steps-new'  data-site-group='PRODUCTION') W.Steps
+      a(href='/tt/tt-processes-new' data-site-group='PRODUCTION') Processes
+      a(href='/tt/tt-plan-new'   data-site-group='PRODUCTION') W.Plan
+
+  div.dropdown(data-site-group='TIME TRACKING')
+    button.dropbtn(type='button' aria-expanded='false') TIME TRACKING
+    div.dropdown-content
+      a(href='/tt/tt-usr-map'      data-site-group='TIME TRACKING') Map
+      a(href='/tt/tt-orders'       data-site-group='TIME TRACKING') Orders
+      a(href='/tt/tt-rpt-detailed' data-site-group='TIME TRACKING') Report
+      a(href='/tt/tt-rpt-service'  data-site-group='TIME TRACKING') Service time
+      a(href='/tt/tt-active-tasks' data-site-group='TIME TRACKING') Active tasks (kiosk)
+
+  div.dropdown(data-site-group='WAREHOUSE')
+    button.dropbtn(type='button' aria-expanded='false') WAREHOUSE
+    div.dropdown-content
+      //a(href='/wh/wh-order'     ) Order
+      a(href='/wh/wh-rpt-detailed' data-site-group='WAREHOUSE') Report
+      //a(href='/wh/wh-item'      ) Items
+      a(href='/wh/wh-tree-item'    data-site-group='WAREHOUSE') Items
+
+  //div.dropdown
+  //  form#frmKeyUpload(enctype='multipart/form-data' action='' method='POST')
+  //    button.dropbtn(type='button' onClick='$("#fileServiceKey").click();' title='Upload ServiceKey') &nbsp;&#x1f511; 
+  //    input#fileServiceKey(type='file' name='filename' accept='.key' hidden)
+  //    span#ServiceKey(title='Service Key') 
+  //    script(src='../javascripts/adm-menu.js')

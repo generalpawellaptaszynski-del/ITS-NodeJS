@@ -1,0 +1,68 @@
+doctype html
+html
+  head
+    title Active Tasks
+
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1")
+
+    link(rel='stylesheet', href='../stylesheets/tt/tt-active-tasks.css')
+
+  body
+
+    .header
+      .header-left
+        img.logo(src="../images/images-user/logo.png")
+
+      .header-center
+        .title ACTIVE TASKS
+
+      .header-right
+
+        .header-stat
+          .header-stat-label Orders
+          #ordersCount.header-stat-value 0
+
+        .header-stat
+          .header-stat-label Proc.Lists
+          #huCount.header-stat-value 0
+
+        .header-stat
+          .header-stat-label Updated
+          #lastRefresh.header-stat-value --        
+         
+
+    .main-container
+      .left-panel
+        .panel-title Orders
+        #ordersList.orders-list
+       
+      .right-panel
+        .order-header
+          .order-header-left
+            #activeOrderTitle Order
+            #activeProductTitle.active-product-title
+          .order-header-right
+            .order-stats
+              .order-stat
+                .order-stat-label Total HUs
+                #orderTotalHus.order-stat-value 0
+              .order-stat
+                .order-stat-label Active HUs
+                #orderActiveHus.order-stat-value 0
+              .order-stat
+                .order-stat-label Completed HUs
+                #orderCompletedHus.order-stat-value 0
+            .order-progress-row
+              .order-progress-bar
+                #activeOrderProgress.order-progress-fill
+              #activeOrderProgressText.order-progress-value 0%
+        #huList.hu-list
+       
+    .footer
+      .page-progress-wrapper
+        .page-progress-bar
+          #pageProgress.page-progress-fill
+        #pageInfo.page-info 1 / 1      
+
+    script(src='../javascripts/tt/tt-active-tasks.js')

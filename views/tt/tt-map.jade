@@ -1,0 +1,23 @@
+.tt-map-scroll
+  div#map.tt-map-board(data-map-width="1574" data-map-height="491" data-map-scale="4" data-map-image="../images/images-user/map.jpg")
+script(src='../javascripts/tt/tt-map.js')
+hr
+div.map-agenda
+  img(src="../images/map_active.png"   alt="Active").map-agenda-img
+  |- active &nbsp; 
+  img(src="../images/map_setup.png"    alt="Setup").map-agenda-img
+  |- setup &nbsp; 
+  img(src="../images/map_repair.png"   alt="Repair").map-agenda-img
+  |- repair &nbsp; 
+  img(src="../images/map_inactive.png" alt="Inactive").map-agenda-img 
+  | - inactive &nbsp; 
+  img(src="../images/map_issue.png"    alt="Issue").map-agenda-img
+  | - issue
+  br
+  button(title='Refresh page')#btn-refresh
+    img(src="../images/refresh.png" alt="Refresh page").btn-img
+  | Updated at 
+  span#curr-time __:__:__ &nbsp; 
+  span#map-error.error-message 
+
+  

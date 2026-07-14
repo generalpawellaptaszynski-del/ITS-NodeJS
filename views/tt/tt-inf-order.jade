@@ -1,0 +1,93 @@
+doctype html5
+html
+  head
+    meta(name="viewport" content="width=device-width initial-scale=1.0")
+    meta(http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate")
+    meta(http-equiv="Pragma" content="no-cache")
+    meta(http-equiv="Expires" content="0")
+
+    style.
+      .error {color:red;}
+      p {font-size: 16px; color: #464646; text-align: left; margin: 0;}
+      .product {font-weight: bold; color: black; text-align: center;}
+      .order {color: black; text-align: center;}
+      th, td {height: 30px;}
+      th {font-size: 14px; font-weight: bold; background-color: azure;}
+      td {font-size: 14px;}
+      table {width: 100%; border-collapse: collapse; margin-top: 20px;}
+      .logo {width: 100px;}
+      .table_steps th, .table_steps td {border: 1px solid;}
+      .td_barcode      {width: 300px; text-align: right;}
+      .td_quantity     {width: 100px; font-size: 18px; font-weight: bold; text-align: center;}
+      .td_logo         {text-align: right;}
+      .td_doc          {width: 40%;} 
+      .barcode         {height: 60px; margin-right: 20px;}
+      .th_step         {width: 30%;}
+      .th_worker       {width: 20%;}
+      .th_date         {width: 18%;}
+      .th_scrap        {width:  5%;}
+      .step_nr         {width: 5%;}
+
+  body 
+    if Message
+      h2.error #{Message}
+    else
+      - var page = 0
+      each hu_data, hu in hu_list
+
+        if page > 0
+          p(style="page-break-before: always").page-break
+        - page = page + 1
+
+        table 
+          tr 
+            td.td_quantity 
+              p #{hu_data.hu_s_nr} 
+              p #{hu_data.hu_qty} pcs
+            td.td_barcode: div.barcode!= hu_data.hu_barcode
+            td.td_doc
+              p.order Нарачка бр. #{order_name} (#{order_qty} pcs)
+              p.order Налог бр. #{order_name2}
+              p.product #{product_nr} 
+              p.product #{product_name} 
+            td.td_logo
+              img.logo(src="../../../images/images-user/logo.png")
+
+        //- var step_id = 0
+
+        table.table_steps
+          tr 
+            th(colspan=7).step_grp
+              b #{hu_data.hu_s_nr} #{hu_data.hu_s_name} - #{hu_data.hu_qty} пар.
+          tr
+            th.th_step Работна операција
+            th.th_worker Работник
+            th.th_date Датум/Време
+            th.th_scrap Отпад, пар
+            th.th_signature Забелешка
+            
+          each step in hu_data.hu_steps
+            tr 
+              //if step_id != step.step_id
+              //  td.step_name #{step.step_n}. #{step.step_name}
+              //  - step_id = step.step_id
+              //else
+              //  td
+
+              td.step_name #{step.step_n}. #{step.step_name}
+
+
+                
+              each event, index in step.step_events
+                if index > 0 
+                  tr
+                  td(colspan=1)
+                td.step_worker #{event.event_worker}
+                  td.step_dt 
+                    | #{event.event_dt} 
+                    //if event.event_minutes
+                    //  p #{event.event_minutes} min
+                    if event.event_duration
+                      p: small &#9201; #{event.event_duration}
+                td
+                td

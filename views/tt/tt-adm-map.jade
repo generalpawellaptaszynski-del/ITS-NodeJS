@@ -1,0 +1,48 @@
+extends tt-layout  
+
+block content
+  .tt-places-layout
+    div#aside-content 
+      script(src='../javascripts/its_tree_view.js')
+      script(src='../javascripts/tt/tt-adm-map.js')
+      .tt-tree-toolbar.tt-places-toolbar
+        .tt-tree-toolbar-filter
+          table#fltr
+            tr
+              th.tt-filter-title Filter
+              th ID
+              th Workplace
+              th Step
+            tr
+              td.tt-filter-reset-cell: button#btnResetFltr(type="button") Reset
+              td: input#fltr-id.clsFltrInput(type="text" autocomplete="off" title="Filter by workplace ID" placeholder="ID")
+              td: input#fltr-name.clsFltrInput(type="text" autocomplete="off" title="Filter by workplace name" placeholder="Workplace")
+              td: select#fltr-idstep.clsFltrSelect(title="Filter by step")
+      .tt-tree-scroll
+        table#tree-places
+          thead
+            tr
+              th
+              th ID
+              th Workplace
+              th Step
+          tbody
+
+      footer#treeFooter.tt-tree-footer
+        p.remark Drag & Drop the icon to place a workplace on the map. RightClick to edit or delete a workplace.
+      form#frmMapUpload(enctype="multipart/form-data" action="" method="POST")
+        button(type='button' onClick='$("#fileMap").click();' title='Change the map (*.jpg)') Change the map
+        input#fileMap(type="file" name="filename" accept=".jpg" hidden)
+
+      #placeDialog(title="Edit workplace" style="display:none")
+        form#placeDialogForm
+          input#place_id(type="hidden")
+          .place-dialog-grid
+            label(for="place_name") Workplace
+            input#place_name(type="text" autocomplete="off" required)
+            label(for="place_step") Step
+            select#place_step(required)
+    div#main-content
+      include tt-map.jade
+    
+  

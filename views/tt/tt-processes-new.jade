@@ -1,0 +1,32 @@
+extends tt-layout  
+
+block style
+  link(rel='stylesheet', href='../stylesheets/tt/tt-production-new.css')
+
+block content
+  h1 Processes
+  div#productToolbar.product-toolbar
+    div.product-toolbar-filter
+      span.product-toolbar-label Filter
+      button#btnResetFltr(type="button") Reset
+      input#process_name.clsFltrInput(type="text" autocomplete="off" title="Type process group, step number or name, then press Enter or leave the field to apply" placeholder="Filter processes")
+    div.product-toolbar-actions
+      button#btnAddProductGrpNew.btnAdd.btn-new-group(type="button")
+        span.btn-new-group-icon(aria-hidden="true")
+        span New process
+  div.production-shell-scroll
+    table#tree
+      tbody
+  footer#productFooter.product-footer
+    p.remark RightClick to open the context menu
+  #productDialog(title="Process group")
+    form#productDialogForm
+      input(type="hidden" id="productDialogMode")
+      input(type="hidden" id="productDialogKey")
+      input(type="hidden" id="productDialogParentKey")
+      label(for="productDialogNr") Nr
+      input(type="text" id="productDialogNr" autocomplete="off")
+      label(for="productDialogName") Name
+      input(type="text" id="productDialogName" autocomplete="off")
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/tt/tt-processes-new.js')

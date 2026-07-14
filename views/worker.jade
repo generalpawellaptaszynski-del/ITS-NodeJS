@@ -1,0 +1,82 @@
+extends layout
+
+block append style
+  link(rel='stylesheet', href='../stylesheets/wh/wh-style.css')
+  link(rel='stylesheet', href='../stylesheets/worker.css')
+
+block content
+  h1 Employees
+
+  .div-main
+    .tree-panel
+      .wh-tree-toolbar
+        .wh-tree-toolbar-filter
+          table#fltr
+            tr
+              th.wh-filter-title Filter
+              th Nr
+              th Name
+            tr
+              td.wh-filter-reset-cell: button#btnResetFltr(type="button") Reset
+              td: input(type="text" autocomplete="off" title="Filter by worker number")#fltr-nr.clsFltrInput
+              td: input(type="text" autocomplete="off" title="Filter by worker name")#fltr-name.clsFltrInput
+        .wh-tree-toolbar-actions
+          button#btnNewGroup(type="button" title="Add worker group").wh-report-link.btn-new-group
+            span.btn-new-group-icon(aria-hidden="true")
+            span New group
+          button#btnNewWorker(type="button" title="Add employee").wh-report-link New employee
+
+      .wh-tree-scroll
+        table#tree-items
+          thead
+            tr
+              th
+              th Nr
+              th Name
+          tbody
+
+      footer#treeFooter.product-footer.wh-tree-footer
+        p.remark
+          | RightClick - edit or delete
+          br
+          | Hover over a worker to preview the photo
+
+    #hoverPopup(style="display:none; position:fixed; z-index:3000;")
+      .hp-container
+        h4#hp_name Employee
+        .hp-grid
+          img#hp_preview(src="" alt="No image")
+          .hp-fields
+            div
+              span.hp-label Nr:
+              span#hp_nr
+            div
+              span.hp-label Group:
+              span#hp_group
+
+  #editModalOverlay
+    #editModal
+      h3#editModalTitle Add employee
+      input(type="hidden" id="edit_item_key")
+
+      img#edit_item_preview(src="" alt="No image")
+
+      label(for="edit_item_nr").required Nr:
+      input(type="text" id="edit_item_nr" required)
+
+      label(for="edit_item_name").required Name:
+      input(type="text" id="edit_item_name" required)
+
+      label(for="edit_item_grp") Group:
+      select#edit_item_grp
+        option(value="") No group
+
+      label(for="edit_item_img") Change image:
+      input(type="file" id="edit_item_img" accept="image/*")
+
+      .modal-footer
+        button#btnEditSave(disabled) Save
+        button#btnEditCancel Cancel
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/worker.js')

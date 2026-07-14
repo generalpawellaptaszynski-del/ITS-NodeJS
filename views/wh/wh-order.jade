@@ -1,0 +1,25 @@
+extends wh-layout  
+
+block content
+  table#tbl-order
+    tr
+      td#td-order  
+        h1 Order
+        .order-form
+          .form-group
+            label(for='worker') Worker:
+            select#worker.accent
+          .form-group
+            label(for='dtarget') Target Date:
+            input#dtarget(type='date', placeholder='Select target date')
+        div#grd-order.grd
+        p.remark Select your name to see the order
+      td
+        div#grd.grd
+        p.remark DoubleClick on a row to add the item
+        
+  include ../grid.jade  
+  div#div-img-preview
+    img#img-preview
+  script(src='../javascripts/grd.js')
+  script(src='../javascripts/wh/wh-order.js')

@@ -1,0 +1,20 @@
+doctype html5
+html
+  head
+    meta(name="viewport" content="width=device-width initial-scale=1.0")
+  style.
+    .error {color:red;}
+    table {border:1px silver solid; padding: 2mm; }
+    .badge_storage {font-size: 24px; font-weight: bold; color: black; text-align: center;}
+    .badge_barcode {text-align: center;} 
+    .barcode {height: 18mm !important;}
+  body   
+    if Message
+      h2.error #{Message}
+    else
+      table
+        tr 
+          td.badge_storage #{storage}
+        tr            
+          td.badge_barcode  
+            div.barcode!= barcode

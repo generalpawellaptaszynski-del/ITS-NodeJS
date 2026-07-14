@@ -1,0 +1,49 @@
+extends tt-layout
+
+block content
+  .tt-tree-toolbar
+    .tt-tree-toolbar-filter
+      table#fltr
+        tr
+          th.tt-filter-title Filter
+          th Date from
+          th Date to
+          th Work.Place
+          th Work.Step
+          th Worker
+          th Product grp
+        tr
+          td.tt-filter-reset-cell: button#btnResetFltr(type="button") Reset
+          td: input#dfrom.clsFltrInput(type="date" title="Filter by start date")
+          td: input#dto.clsFltrInput(type="date" title="Filter by end date")
+          td: select#idplace.clsFltrSelect(title="Filter by work place")
+          td: select#idstep.clsFltrSelect(title="Filter by work step")
+          td: select#idworker.clsFltrSelect(title="Filter by worker")
+          td: select#idproduct_grp.clsFltrSelect(title="Filter by product group")
+    .tt-tree-toolbar-filter.tt-proclist-filter
+      label(for="hu") Proc.List
+      input#hu(type="number" title="Open processing list")
+    .tt-tree-toolbar-actions
+      a(href='/tt/report/detailed/xlsx' title='Export to Excel').tt-report-link
+        img(src='../images/excel.png' alt='Export to Excel')
+
+  .tt-tree-scroll
+    table#tree-report
+      thead
+        tr
+          th
+          th Date / Time
+          th.td-sec Sec
+          th.td-place Work.Place
+          th.td-step Work.Step
+          th.td-worker Worker
+          th.td-product Product group
+          th.td-hu Proc.List
+      tbody
+
+  footer#treeFooter.tt-tree-footer
+    p.remark DblClick on the row to show the processing list
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/tt/tt-rpt-detailed.js')
+  script(src='../javascripts/tt/tt-show-hu.js')

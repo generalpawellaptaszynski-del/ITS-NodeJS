@@ -1,0 +1,74 @@
+extends wh-layout
+
+block content
+  .tree-panel.wh-report-panel
+    .wh-tree-toolbar
+      .wh-tree-toolbar-filter
+        table#fltr
+          tr
+            td.wh-filter-reset-cell: button#btnResetFltr(type="button") Reset
+            th Group
+            th Name
+            th Number
+            th Storage
+            th Vendor
+          tr
+            th Document
+            td: select#doc_grp.clsFltrSelect(title="Filter by document group")
+            td: input(type="text" autocomplete="off" title="Filter by document name")#doc_name.clsFltrInput
+          tr
+            th Employee
+            td: select#worker_grp.clsFltrSelect(title="Filter by employee group")
+            td: input(type="text" autocomplete="off" title="Filter by employee name")#worker_name.clsFltrInput
+            td: input(type="text" autocomplete="off" title="Filter by employee number")#worker_nr.clsFltrInput
+          tr
+            th Item
+            td: select#item_grp.clsFltrSelect(title="Filter by item group")
+            td: input(type="text" autocomplete="off" title="Filter by item name")#item_name.clsFltrInput
+            td: input(type="text" autocomplete="off" title="Filter by item number")#item_nr.clsFltrInput
+            td: input(type="text" autocomplete="off" title="Filter by storage bin")#item_storage.clsFltrInput
+            td: select#item_vendor.clsFltrSelect(title="Filter by vendor")
+      .wh-tree-toolbar-actions
+        a(href='/wh/report' title='Export to Excel').wh-report-link
+          img(src='../images/excel.png' alt='Export to Excel')
+
+    .wh-tree-scroll
+      table#tree-report
+        thead
+          tr
+            th
+            th
+            th.td-price Price
+            th.td-qty Quantity
+        tbody
+
+    footer#treeFooter.product-footer.wh-tree-footer
+      p.remark Excel icon exports the report
+
+  #hoverPopup(style="display:none; position:fixed; z-index:3000;")
+    .hp-container
+      h4#hp_name Item name
+      .hp-grid
+        img#hp_preview(src="" alt="No image")
+        .hp-fields
+          div
+            span.hp-label Storage bin:
+            span#hp_storage
+          div
+            span.hp-label Group:
+            span#hp_group
+          div
+            span.hp-label Vendor:
+            span#hp_vendor
+          div
+            span.hp-label Item Nr:
+            span#hp_nr
+          div
+            span.hp-label Price:
+            span#hp_price
+          div
+            span.hp-label Min qty:
+            span#hp_minQty
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/wh/wh-rpt-detailed.js')

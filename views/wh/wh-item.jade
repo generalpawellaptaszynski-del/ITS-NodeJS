@@ -1,0 +1,45 @@
+extends wh-layout  
+
+block content
+  h1 Items
+  div#grd.grd
+  include ../grid.jade  
+  p.remark RightClick - context menu
+
+  div#detailsDialog
+    form#detailsForm.frm-details(enctype="multipart/form-data" action="" method="POST")
+      table
+        tr
+          td(rowspan=7): img#img(alt="No image")
+          td: label(for="nr") Nr:
+          td: input#nr(name="nr" type="text").accent
+        tr 
+          td: label(for="name") Name:
+          td: input#name(name="name" type="text").accent
+        tr 
+          td: label(for="grp") Group:
+          td: input#grp(name="grp" type="text")
+        tr 
+          td: label(for="vendor") Vendor:
+          td: input#vendor(name="vendor" type="text")
+        tr 
+          td: label(for="itemNo") Item Nr:
+          td: input#itemNo(name="itemNo" type="text")
+        tr 
+          td: label(for="price") Price:
+          td: input#price(name="price" type="number" min="0")
+        tr 
+          td: label(for="minQty") Min quantity:
+          td: input#minQty(name="minQty" type="number" min="0")
+        tr 
+          td
+            p#remark-img.remark DblClick to change
+            input#filename(hidden type='file' name='filename' accept='.jpg')
+          td  
+          td: button#save(type="submit") Save
+    
+  script(src='../jquery-contextmenu/dist/jquery.contextMenu.min.js')
+  link(rel='stylesheet', href='../jquery-contextmenu/dist/jquery.contextMenu.min.css')
+  script(src='../javascripts/prn-div.js')
+  script(src='../javascripts/wh/wh-item.js')
+  

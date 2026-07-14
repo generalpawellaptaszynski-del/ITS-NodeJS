@@ -1,0 +1,62 @@
+block variables
+doctype html5
+html
+  head
+    title FEDS
+    
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate")
+    meta(http-equiv="Pragma" content="no-cache")
+    meta(http-equiv="Expires" content="0")
+
+    script(src='../jquery/dist/jquery.min.js')
+    
+    link(rel='stylesheet', href='../jquery-ui-dist/jquery-ui.min.css')
+    script(src='../jquery-ui-dist/jquery-ui.min.js')
+
+    link(rel='stylesheet', href='../jquery-contextmenu/dist/jquery.contextMenu.min.css')
+    script(src='../jquery-contextmenu/dist/jquery.contextMenu.min.js')
+
+    script(src='../jquery-validation/dist/jquery.validate.min.js')
+
+    script(src='../javascripts/layout.js')
+    link(rel='stylesheet', href='../stylesheets/style.css')
+    script.
+      window.ITS_AUTH_TOKEN = !{JSON.stringify(itsAuthToken || '')};
+      window.SITE_GROUP_TITLE = {
+        '/worker': 'HR',
+        '/ta/ta-event': 'HR',
+        '/tt/tt-adm-map': 'PRODUCTION',
+        '/tt/tt-product-new': 'PRODUCTION',
+        '/tt/tt-steps-new': 'PRODUCTION',
+        '/tt/tt-processes-new': 'PRODUCTION',
+        '/tt/tt-plan-new': 'PRODUCTION',
+        '/tt/tt-usr-map': 'TIME TRACKING',
+        '/tt/tt-orders': 'TIME TRACKING',
+        '/tt/tt-rpt-detailed': 'TIME TRACKING',
+        '/tt/tt-rpt-service': 'TIME TRACKING',
+        '/tt/tt-active-tasks': 'TIME TRACKING',
+        '/wh/wh-rpt-detailed': 'WAREHOUSE',
+        '/wh/wh-tree-item': 'WAREHOUSE'
+      };
+
+    block style
+
+  body  
+
+    header.site-header
+      block header
+        .site-header-brand
+          img.site-brand-logo(src="../images/images-user/logo.png" alt="Company logo")
+          .site-brand-title
+            .site-brand-group#site-brand-group
+            .site-brand-divider
+            .site-brand-item#site-brand-item
+    nav.site-nav
+      input#nav-toggle.site-nav-toggle(type="checkbox")
+      .site-nav-shell
+        include nav
+        block main-nav
+    div#content
+      section#main-content
+        block content

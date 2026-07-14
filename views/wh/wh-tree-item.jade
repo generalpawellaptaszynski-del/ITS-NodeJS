@@ -1,0 +1,170 @@
+extends wh-layout  
+
+block content
+  h1 Items
+
+  .div-main
+    .tree-panel
+      .wh-tree-toolbar
+        .wh-tree-toolbar-filter
+          table#fltr
+            tr
+              th.wh-filter-title Filter
+              th Name
+              th Storage
+              th Number
+              th Vendor
+            tr
+              td.wh-filter-reset-cell: button#btnResetFltr(type="button") Reset
+              td: input(type="text" title="Filter by item name")#item_name.clsFltrInput
+              td: input(type="text" title="Filter by storage bin")#item_nr.clsFltrInput
+              td: input(type="text" title="Filter by item number")#item_itemNo.clsFltrInput
+              td: select#item_vendor.clsFltrSelect(title="Filter by vendor")
+        .wh-tree-toolbar-actions
+          button#btnNewRootGroup(type="button" title="Create main group").wh-report-link.btn-new-group
+            span.btn-new-group-icon(aria-hidden="true")
+            span New group
+          a(href="javascript: location.href ='/wh/report';" title="Report").wh-report-link
+            img(src='../images/excel.png' alt="Report")
+
+      .wh-tree-scroll
+        table#tree-items
+          thead
+            tr
+              th
+              th Item
+              th Storage
+              th.td-qty On stock
+          tbody
+
+      footer#treeFooter.product-footer.wh-tree-footer
+        p.remark
+          | RightClick - context menu
+          br
+          | DblClick - add to the basket
+ 
+    #basketPanel.basket-panel.card
+      h3.card-title Basket
+  
+      .basket-controls
+        .basket-op
+          label.basket-op-btn
+            input(type="radio" name="basket_op" value="Outgoing" checked)
+            span Outgoing
+        
+          label.basket-op-btn
+            input(type="radio" name="basket_op" value="Incoming")
+            span Incoming
+        
+          label.basket-op-btn
+            input(type="radio" name="basket_op" value="Inventory")
+            span Inventory
+        select#basket_user
+        input#basket_doc(type="text" placeholder="Document / note")
+  
+      table#basketTable
+        thead
+          tr
+            th Item
+            th Qty
+            th
+        tbody#basketBody
+  
+      .basket-footer
+        button#btnBasketSave.primary Save
+        button#btnBasketClear Clean basket
+        button#btnBasketPrint(type="button") Print labels
+
+
+  // ==========================
+  // EDIT ITEM MODAL
+  // ==========================
+  #editModalOverlay
+    #editModal
+      h3 Edit item
+      input(type="hidden" id="edit_item_key")
+  
+      // Left column = image
+      img#edit_item_preview(src="" alt="No image")
+  
+      // Right column = fields
+      label(for="edit_item_nr").required Storage Bin:
+      input(type="text" id="edit_item_nr" required)
+
+      label(for="edit_item_name").required Name:
+      input(type="text" id="edit_item_name" required)
+    
+      label(for="edit_item_group") Group:
+      select(id="edit_item_group")
+        option(value="") — Select group —
+         
+      label(for="edit_item_vendor") Vendor:
+      input(type="text" id="edit_item_vendor")
+  
+      label(for="edit_item_itemNo") Item Nr:
+      input(type="text" id="edit_item_itemNo")
+  
+      label(for="edit_item_price") Price:
+      input(type="number" step="0.01" id="edit_item_price")
+  
+      label(for="edit_item_minQty") Min quantity:
+      input(type="number" id="edit_item_minQty")
+  
+      label(for="edit_item_img") Change image:
+      input(type="file" id="edit_item_img" accept="image/*")
+  
+      .modal-footer
+        button#btnEditSave(disabled) Save
+        button#btnEditCancel Cancel
+
+  // ==========================
+  // READ-ONLY HOVER POPUP
+  // ==========================
+  #hoverPopup(style="display:none; position:absolute; z-index:3000;")
+    .hp-container
+      h4#hp_name Item name
+      .hp-grid
+        img#hp_preview(src="" alt="No image")
+        .hp-fields
+          div
+            span.hp-label Storage bin:
+            span#hp_storage
+          div
+            span.hp-label Group:
+            span#hp_group
+          div
+            span.hp-label Vendor:
+            span#hp_vendor
+          div
+            span.hp-label Item Nr:
+            span#hp_nr
+          div
+            span.hp-label Price:
+            span#hp_price
+          div
+            span.hp-label Min qty:
+            span#hp_minQty
+
+  // ==========================
+  // LAST OPERATION MODAL
+  // ==========================
+  #lastOpOverlay
+    .overlay-card
+      .overlay-header Last operations
+      table.last-op-table
+        thead
+          tr
+            td.col-check
+            th Date
+            th Document
+            th Qty
+            th User
+            th Note
+        tbody#lastOpBody
+   
+      .modal-buttons
+        button#btnLastOpDelete(disabled) Delete selected
+        button#btnLastOpClose Close 
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/wh/wh-tree-item.js')

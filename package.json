@@ -1,0 +1,39 @@
+{
+  "name": "its-app",
+  "version": "0.0.1",
+  "private": true,
+  "main": "app.js",
+  "author": "P.Laptashynskyi",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "dev:server": "node its-dev-port3003.js",
+    "dev:gui": "node app-its-gui-port3001.js",
+    "dev:iot": "node app-its-iot-port3002.js",
+    "check": "find . -path './node_modules' -prune -o -name '*.js' -print | sort | xargs -n 1 node --check"
+  },
+  "dependencies": {
+    "bwip-js": "^4.8.0",
+    "cookie-parser": "^1.4.5",
+    "debug": "~2.6.9",
+    "exceljs": "^3.9.0",
+    "express": "^4.17.1",
+    "jade": "^1.9.2",
+    "jquery": "^3.5.1",
+    "jquery-contextmenu": "^2.9.2",
+    "jquery-datetimepicker": "^2.5.21",
+    "jquery-ui-dist": "^1.12.1",
+    "jquery-validation": "^1.19.2",
+    "jsgrid": "^1.5.3",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "mysql": "^2.18.1",
+    "nib": "^1.1.2",
+    "nodemon": "^3.1.11",
+    "pdfkit": "^0.17.2",
+    "rescode": "^0.1.10",
+    "serve-favicon": "~2.4.5",
+    "stylus": "^0.54.7",
+    "unidecode": "^0.1.8"
+  }
+}

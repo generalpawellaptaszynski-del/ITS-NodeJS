@@ -1,0 +1,2 @@
+CREATE USER 'its_dev_user'@'10.10.10.11' IDENTIFIED BY 'CHANGE_ME_STRONG_PASSWORD';
+GRANT EXECUTE ON its_dev_db.* TO 'its_dev_user'@'10.10.10.11';

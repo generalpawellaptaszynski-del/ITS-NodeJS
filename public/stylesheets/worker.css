@@ -1,0 +1,47 @@
+#tree-items th:nth-child(2),
+#tree-items .its-tree-nr {
+  width: 180px;
+}
+
+#tree-items th:nth-child(3),
+#tree-items .its-tree-name {
+  width: auto;
+}
+
+#tree-items .worker-group-row > td,
+#tree-items .its-tree-group-row > td {
+  background: rgba(105, 167, 255, 0.08);
+  border-bottom: 1px solid rgba(105, 167, 255, 0.14);
+  cursor: pointer;
+}
+
+#tree-items .worker-group-row .its-tree-nr,
+#tree-items .its-tree-group-row .its-tree-nr {
+  font-weight: 700;
+  color: #214a7a;
+}
+
+#tree-items .worker-group-row .its-tree-name,
+#tree-items .its-tree-group-row .its-tree-name {
+  color: #5f7186;
+}
+
+#tree-items .worker-group-label,
+#tree-items .its-tree-group-label {
+  display: inline-block;
+  margin-right: 10px;
+  font-weight: 700;
+  color: #17324d;
+}
+
+#tree-items .worker-group-count,
+#tree-items .its-tree-group-count {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(105, 167, 255, 0.16);
+  color: #2b5b91;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}

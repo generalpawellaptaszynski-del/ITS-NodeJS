@@ -1,0 +1,48 @@
+extends ta-layout
+
+block append style
+  link(rel='stylesheet', href='../jquery-datetimepicker/build/jquery.datetimepicker.min.css')
+
+block content
+  .tt-tree-toolbar
+    .tt-tree-toolbar-filter
+      table#fltr
+        tr
+          th Period
+          th Worker
+          td.tt-filter-action-cell(rowspan="2")
+            button#taNewEventBtn(type="button" title="Add event for selected worker").tt-tree-action-btn
+              span.tt-tree-action-icon +
+              span.tt-tree-action-label New event
+        tr
+          td: select#rpt-period.clsFltrSelect(title="Filter by period")
+          td: select#rpt-worker.clsFltrSelect(title="Filter by worker")
+    .tt-tree-toolbar-actions
+      a#taExportLink(href="#" title="Export to Excel").tt-report-link
+        img(src='../images/excel.png' alt='Export to Excel')
+
+  .tt-tree-scroll
+    table#tree-report
+      thead
+        tr
+          th
+          th Date / Time
+          th.alignRight Duration
+      tbody
+
+  footer#treeFooter.tt-tree-footer
+    p.remark RightClick an item to delete it.
+
+  #eventDialog
+    form#eventForm.frm-details(action="" method="POST")
+      table
+        tr
+          td: label(for="eventDt") Date / Time:
+          td: input#eventDt(name="dt" type="text").accent
+        tr
+          td: label(for="eventDuration") Duration:
+          td: input#eventDuration(name="duration" type="text").accent
+
+  script(src='../jquery-datetimepicker/build/jquery.datetimepicker.full.min.js')
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/ta/ta-event.js')

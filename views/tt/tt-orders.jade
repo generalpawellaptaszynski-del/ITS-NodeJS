@@ -1,0 +1,70 @@
+extends tt-layout
+
+block content
+  .tt-orders-topbar
+    .order-form-container.tt-orders-form#new-order
+      .form-row
+        .form-group
+          label(for='order') Order Number
+          input(type="text" placeholder="Enter order number")#order.form-control
+        .form-group
+          label(for='order2') Reference/Tax Number
+          .tt-field-control
+            input(type="text" placeholder="Enter reference" aria-describedby="order2-error")#order2.form-control
+            .tt-field-error#order2-error(role="alert" aria-live="polite")
+        .form-group
+          label(for='dtarget') Target Date
+          input(type="date")#dtarget.form-control
+
+      .form-row
+        .form-group.product-select
+          label(for='product-grp') Product Group
+          select#product-grp.form-control
+            option(value='') Select a group
+        .form-group.product-select
+          label(for='product-sgrp') Sub-group
+          select#product-sgrp.form-control
+            option(value='') Select a sub-group
+        .form-group.product-select
+          label(for='product') Product
+          select#product.form-control
+            option(value='') Select a product
+
+      .form-row
+        .form-group
+          label(for='qty') Quantity
+          .qty-wrapper
+            input(type="number" min="0" step="1")#qty.form-control
+            span.qty-unit pcs
+        .form-group
+          label(for='qtyOnList') Per List
+          .qty-wrapper
+            input(type="number" min="0" step="1")#qtyOnList.form-control
+            span.qty-unit pcs
+        .form-group.tt-orders-action-group
+          button(type="button")#btnAddOrder.btn.btn-primary.tt-orders-save-btn Save Order
+
+  .tt-tree-scroll
+    table#tree-orders
+      thead
+        tr
+          th
+          th
+            .tt-orders-tree-head
+              span Order / Proc.list
+              .tt-orders-tree-search
+                span.tt-orders-search-icon(aria-hidden='true')
+                input#hu(type='number' placeholder='Proc.list' title='Proc.list').form-control
+      tbody
+
+  footer.tt-tree-footer
+    .remark.tt-orders-remark
+      .tt-orders-remark-line DblClick to show the Order/Proc.list.
+      .tt-orders-remark-line Cannot delete a commenced order.
+      .tt-orders-remark-line
+        | Incomplete orders/proc.lists are 
+        span.node-incomplete colored
+
+  script(src='../javascripts/its_tree_view.js')
+  script(src='../javascripts/tt/tt-orders.js')
+  script(src='../javascripts/tt/tt-show-hu.js')

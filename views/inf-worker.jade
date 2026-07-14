@@ -1,0 +1,31 @@
+doctype html5
+html
+  head
+    meta(name="viewport" content="width=device-width initial-scale=1.0")
+  style.
+    .error {color:red;}
+    table {border:1px silver solid; width: 85mm; height: 55mm; padding: 5mm;}
+    //td {border:1px silver solid;}
+    .badge_header, .badge_footer {background: #80ccff; height: 5mm;  border-radius: 5mm; text-align: center;}
+    .badge_photo {height: 24mm;  width: 18mm; border-radius: 5%;}
+    .badge_photo_cell {width: 20mm; text-align: center; align: center; padding-left: 1mm; padding-bottom: 0mm;}
+    .badge_name {font-size: 24px; font-weight: bold; color: black; text-align: center; vertical-align: center;}
+    .badge_barcode {text-align: center;}
+    .barcode {height: 10mm !important;}
+    
+  body   
+    if Message
+      h2.error #{Message}
+    else
+      table
+        tr
+          td.badge_header(colspan="2") 
+          //: img.badge_logo(src="http://localhost:3000/images/NoImage.jpg" alt="Logo")
+        tr 
+          td.badge_photo_cell: img.badge_photo(src="#{img}" alt="#{img}")
+          td.badge_name #{name} 
+        tr  
+          td.badge_barcode!= barcode
+        tr
+          td.badge_footer(colspan="2")
+       
