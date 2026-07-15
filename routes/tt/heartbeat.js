@@ -10,6 +10,10 @@ function sendJson(res, status, payload) {
   res.status(status).send(JSON.stringify(payload));
 }
 
+function procedureResultSets(rows) {
+  return Array.isArray(rows) ? rows.filter(Array.isArray) : [];
+}
+
 function parseDeviceId(value) {
   var devid = Number(value);
   return Number.isInteger(devid) && devid > 0 ? devid : null;
@@ -60,7 +64,7 @@ function heartbeatChanged(req, res) {
     if (err) {
       res.status(500).send(JSON.stringify({Result: 'ERROR', Message: JSON.stringify(err)}));
     } else {
-      res.status(200).send(unidecode(JSON.stringify(rows[0] || [])));
+      res.status(200).send(unidecode(JSON.stringify(procedureResultSets(rows))));
     }
   });
 }
