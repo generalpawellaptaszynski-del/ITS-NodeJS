@@ -770,158 +770,174 @@ DELIMITER ;
 -- tt_heartbeatChanged.sql
 DROP PROCEDURE IF EXISTS tt_heartbeatChanged;
 DELIMITER //
-CREATE PROCEDURE tt_heartbeatChanged(IN p_devid INT, IN p_tags VARCHAR(255))
+CREATE PROCEDURE tt_heartbeatChanged(
+    IN p_devID INT(10),
+    IN p_tags VARCHAR(255)
+)
 BEGIN
-  DECLARE v_continuousTime INT DEFAULT 60;
-  DECLARE v_tags VARCHAR(255) DEFAULT '';
-  DECLARE v_newIdStep INT DEFAULT NULL;
-  DECLARE v_hu INT DEFAULT NULL;
-  DECLARE v_idstep INT;
-  DECLARE v_huTag VARCHAR(8);
-  DECLARE v_workplace VARCHAR(255);
-  DECLARE v_workstep NVARCHAR(255);
-  DECLARE v_previousTags VARCHAR(255);
-  DECLARE v_tagsChanged TINYINT(1) DEFAULT 0;
+    /* 1. Declare variables and temporary tables */
+    DECLARE v_continuousTime INT DEFAULT 60;
+    DECLARE v_newIdStep      INT DEFAULT NULL;
+    DECLARE v_hu             INT DEFAULT NULL;
+    DECLARE v_idstep         INT;
+    DECLARE v_huTag          VARCHAR(8);
+    DECLARE v_workplace      VARCHAR(255);
+    DECLARE v_workstep       NVARCHAR(255);
+    DECLARE v_previousTags   VARCHAR(255);
 
-  SET v_tags = UPPER(TRIM(IFNULL(p_tags, '')));
+    /* 2. Check if the device is valid */
+    SELECT tags, idstep, name
+      INTO v_previousTags, v_idstep, v_workplace
+      FROM tt_place
+     WHERE id = p_devID;
 
-  IF NOT EXISTS(SELECT 1 FROM tt_place WHERE id = p_devid) THEN
-    SIGNAL SQLSTATE '45000'
-       SET MESSAGE_TEXT = 'The device does not exist.';
-  END IF;
-
-  SELECT IFNULL(tags, ''), idstep, name
-    INTO v_previousTags, v_idstep, v_workplace
-    FROM tt_place
-   WHERE id = p_devid;
-
-  SET v_tagsChanged = NOT (v_tags <=> v_previousTags);
-
-  UPDATE tt_event
-     SET isArchived = 1
-   WHERE isArchived = 0
-     AND dtend IS NOT NULL
-     AND dtend < DATE_SUB(NOW(), INTERVAL v_continuousTime SECOND);
-
-  SET v_hu = (
-    SELECT hu
-      FROM tag_hu
-     WHERE FIND_IN_SET(tag, v_tags)
-     ORDER BY hu
-     LIMIT 1
-  );
-
-  SET v_huTag = (
-    SELECT tag
-      FROM tag_hu
-     WHERE hu = v_hu
-       AND FIND_IN_SET(tag, v_tags)
-     ORDER BY tag
-     LIMIT 1
-  );
-
-  DROP TEMPORARY TABLE IF EXISTS _tblWorkers;
-
-  CREATE TEMPORARY TABLE _tblWorkers (
-    idworker INT NOT NULL PRIMARY KEY,
-    tag VARCHAR(8),
-    name VARCHAR(255),
-    KEY idx_tblWorkers_name (name)
-  ) ENGINE=MEMORY;
-
-  INSERT INTO _tblWorkers (idworker, tag, name)
-  SELECT t.idworker, MIN(t.tag), w.name
-    FROM tag_worker t
-   INNER JOIN worker w ON w.id = t.idworker
-   WHERE FIND_IN_SET(t.tag, v_tags)
-   GROUP BY t.idworker, w.name;
-
-  IF v_tagsChanged THEN
-    SET v_newIdStep = (
-      SELECT idstep
-        FROM tag_step
-       WHERE FIND_IN_SET(tag, v_tags)
-       ORDER BY idstep
-       LIMIT 1
-    );
-
-    IF v_newIdStep IS NOT NULL THEN
-      SET v_idstep = v_newIdStep;
+    IF ROW_COUNT() = 0
+     THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'The device does not exist.';
     END IF;
 
-    UPDATE tt_event e
-       SET e.dtend = NOW()
-     WHERE e.isArchived = 0
-       AND e.dtend IS NULL
-       AND e.idplace = p_devid
-       AND (NOT (e.idstep <=> v_idstep)
-            OR v_hu IS NULL
-            OR NOT (e.hu <=> v_hu)
-            OR NOT EXISTS(SELECT 1 FROM _tblWorkers w WHERE w.idworker = e.idworker));
+    /* 3. Archive old data (regardless of the device)
+          NOTE: consider moving to a scheduled EVENT — see header notes. */
+    UPDATE tt_event
+       SET isArchived = 1
+     WHERE isArchived = 0
+       AND dtend < DATE_SUB( NOW(), INTERVAL v_continuousTime SECOND );
 
-    UPDATE tt_event e
-       SET e.dtend = NOW()
-     WHERE e.isArchived = 0
-       AND e.dtend IS NULL
-       AND e.idplace <> p_devid
-       AND ((v_hu IS NOT NULL AND e.hu = v_hu)
-            OR EXISTS(SELECT 1 FROM _tblWorkers w WHERE w.idworker = e.idworker));
+    /* 3b. Parse p_tags ONCE into a temp table, instead of re-parsing it
+           with FIND_IN_SET() against tag_hu / tag_worker / tag_step. */
+    DROP TEMPORARY TABLE IF EXISTS _tblTags;
+    CREATE TEMPORARY TABLE _tblTags (
+        tag VARCHAR(8) NOT NULL,
+        PRIMARY KEY (tag)
+    ) ENGINE=MEMORY;
 
-    UPDATE tt_event e
-    INNER JOIN _tblWorkers w ON w.idworker = e.idworker
-       SET e.dtend = NULL
-     WHERE v_hu IS NOT NULL
-       AND v_idstep IS NOT NULL
-       AND e.isArchived = 0
-       AND e.idplace = p_devid
-       AND e.idstep = v_idstep
-       AND e.hu = v_hu
-       AND e.dtend >= DATE_SUB(NOW(), INTERVAL v_continuousTime SECOND);
+    INSERT IGNORE INTO _tblTags (tag)
+    WITH RECURSIVE split_tags (tag, rest) AS (
+        SELECT
+            TRIM(SUBSTRING_INDEX(p_tags, ',', 1)),
+            CASE WHEN LOCATE(',', p_tags) > 0
+                 THEN SUBSTRING(p_tags, LOCATE(',', p_tags) + 1)
+                 ELSE NULL END
+        UNION ALL
+        SELECT
+            TRIM(SUBSTRING_INDEX(rest, ',', 1)),
+            CASE WHEN LOCATE(',', rest) > 0
+                 THEN SUBSTRING(rest, LOCATE(',', rest) + 1)
+                 ELSE NULL END
+          FROM split_tags
+         WHERE rest IS NOT NULL
+    )
+    SELECT tag FROM split_tags WHERE tag <> '';
 
-    INSERT INTO tt_event (dt, idplace, idstep, idworker, hu)
-    SELECT NOW(), p_devid, v_idstep, w.idworker, v_hu
-      FROM _tblWorkers w
-     WHERE v_hu IS NOT NULL
-       AND v_idstep IS NOT NULL
-       AND NOT EXISTS(
-             SELECT 1
-               FROM tt_event e
-              WHERE e.isArchived = 0
-                AND e.dtend IS NULL
-                AND e.idplace = p_devid
-                AND e.idstep = v_idstep
-                AND e.hu = v_hu
-                AND e.idworker = w.idworker
-           );
-  END IF;
+    /* 4. Calculate HU (now an indexed join instead of FIND_IN_SET scan) */
+    SELECT tag_hu.hu, tag_hu.tag
+      INTO v_hu, v_huTag
+      FROM tag_hu
+     INNER JOIN _tblTags s ON s.tag = tag_hu.tag
+     ORDER BY tag_hu.hu LIMIT 1;
 
-  UPDATE tt_place
-     SET dtlast = NOW(),
-         tags = v_tags,
-         idstep = v_idstep
-   WHERE id = p_devid;
+    /* 5. The list of workers */
+    DROP TEMPORARY TABLE IF EXISTS _tblWorkers;
 
-  SET v_workstep = (
+    CREATE TEMPORARY TABLE _tblWorkers (
+        idworker INT NOT NULL,
+        tag       VARCHAR(8) NOT NULL,
+        name      VARCHAR(255) NOT NULL,
+        isActive  TINYINT NOT NULL DEFAULT 0,
+        PRIMARY KEY (idworker)
+    ) ENGINE=MEMORY;
+
+    INSERT INTO _tblWorkers (idworker, tag, name, isActive)
+    SELECT t.idworker, t.tag, w.name, 0
+      FROM tag_worker t
+     INNER JOIN worker w ON w.id = t.idworker
+     INNER JOIN _tblTags s ON s.tag = t.tag;
+
+    /* 6. Check for changes */
+    IF ( p_tags <> v_previousTags ) THEN
+
+        /* 6.1. If the Working Step has been changed by a RFID tag */
+        SELECT idstep
+          INTO v_newIdStep
+          FROM tag_step
+         INNER JOIN _tblTags s ON s.tag = tag_step.tag
+         ORDER BY idstep LIMIT 1;
+
+        /* If the working step has been changed */
+        IF v_newIdStep IS NOT NULL THEN
+            SET v_idstep = v_newIdStep;
+        END IF;
+
+        /* 6.2. Finish non-existent events on this place, for this HU and for these workers */
+        UPDATE tt_event
+           SET dtend = NOW()
+         WHERE isArchived = 0
+           AND dtend IS NULL
+           AND idplace = p_devID
+           AND ( idstep <> v_idstep OR v_hu IS NULL OR hu <> v_hu
+                 OR idworker NOT IN ( SELECT idworker FROM _tblWorkers ) );
+
+        UPDATE tt_event
+           SET dtend = NOW()
+         WHERE isArchived = 0
+           AND dtend IS NULL
+           AND ( hu = v_hu OR idworker IN ( SELECT idworker FROM _tblWorkers ) )
+           AND idplace <> p_devID;
+
+        /* 6.3. Continue the event, if the correct event finished no more than v_continuousTime seconds ago */
+        UPDATE tt_event e
+         INNER JOIN _tblWorkers w ON w.idworker = e.idworker
+           SET e.dtend = NULL
+         WHERE isArchived = 0
+           AND e.idplace = p_devID
+           AND e.idstep = v_idstep
+           AND e.hu = v_hu
+           AND e.dtend >= DATE_SUB( NOW(), INTERVAL v_continuousTime SECOND );
+
+        /* 6.4. Events to add */
+        UPDATE _tblWorkers w
+         INNER JOIN tt_event e ON e.idworker = w.idworker
+           SET w.isActive = 1
+         WHERE e.isArchived = 0
+           AND e.dtend IS NULL
+           AND e.idplace = p_devID
+           AND e.idstep = v_idstep
+           AND e.hu = v_hu;
+
+        INSERT INTO tt_event ( dt, idplace, idstep, idworker, hu )
+        SELECT NOW(), p_devID, v_idstep, idworker, v_hu
+          FROM _tblWorkers
+         WHERE v_hu IS NOT NULL
+           AND isActive = 0;
+    END IF;
+
+    /* 7. Update tt_place */
+    UPDATE tt_place
+       SET dtlast = NOW()
+         , tags = p_tags
+         , idstep = v_idstep
+     WHERE id = p_devID;
+
+    /* 8. Get results */
     SELECT name
+      INTO v_workstep
       FROM step
      WHERE id = v_idstep
-     ORDER BY name
-     LIMIT 1
-  );
+     LIMIT 1;
 
-  SELECT v_workplace AS workplace, v_workstep AS workstep;
+    SELECT v_workplace AS workplace, v_workstep AS workstep;
+    SELECT v_huTag AS uid, v_hu AS n
+     WHERE v_hu IS NOT NULL;
+    SELECT tag AS uid, name
+      FROM _tblWorkers
+     ORDER BY name;
 
-  SELECT v_huTag AS uid, v_hu AS n
-   WHERE v_hu IS NOT NULL;
-
-  SELECT tag AS uid, name
-    FROM _tblWorkers
-   ORDER BY name;
-
-  DROP TEMPORARY TABLE IF EXISTS _tblWorkers;
+    /* 9. Cleaning */
+    DROP TEMPORARY TABLE IF EXISTS _tblWorkers;
+    DROP TEMPORARY TABLE IF EXISTS _tblTags;
 END//
 DELIMITER ;
-
 
 -- tt_hu_create_order.sql
 DROP PROCEDURE IF EXISTS tt_hu_create_order;
