@@ -60,7 +60,7 @@ function heartbeatChanged(req, res) {
     if (err) {
       res.status(500).send(JSON.stringify({Result: 'ERROR', Message: JSON.stringify(err)}));
     } else {
-      res.status(200).send(unidecode(JSON.stringify(rows)));
+      res.status(200).send(unidecode(JSON.stringify(rows[0] || [])));
     }
   });
 }
