@@ -5,12 +5,17 @@ var express = require('express')
     path = require('path');
  
 var router = express.Router();
-var db = mysql.createConnection(db_parameters);
+var db = mysql.createPool(db_parameters);
 var codes = require('rescode');
 var barcodeCache = Object.create(null);
+var API_QUERY_TIMEOUT_MS = 15000;
 
 var dateFormat = "dd-mm-yy";
 codes.loadModules(["code39"]);
+
+function queryOptions(sql) {
+  return {sql: sql, timeout: API_QUERY_TIMEOUT_MS};
+}
 
 function getBarcodeImg(hu) {
   var key = String(hu);
@@ -23,7 +28,7 @@ function getBarcodeImg(hu) {
 
 /* Full info about the order or HU (HTML-string) */
 router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(req, res, next){
-  db.query('CALL tt_hu_info(?, ?)', [req.params.idorder || null, req.params.hu || null], function(err, rows, fields) {
+  db.query(queryOptions('CALL tt_hu_info(?, ?)'), [req.params.idorder || null, req.params.hu || null], function(err, rows, fields) {
     var orderRows = rows && rows[0] ? rows[0] : [];
     var huRows = rows && rows[1] ? rows[1] : [];
     var stepRows = rows && rows[2] ? rows[2] : [];
@@ -93,7 +98,7 @@ router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(r
 
 /* For the tree of HUs - years */
 router.get('/list/years', function(req, res, next){
-  db.query('CALL tt_hu_list_years()', function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_list_years()'), function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
        res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
@@ -104,7 +109,7 @@ router.get('/list/years', function(req, res, next){
 
 /* For the tree of HUs - months */
 router.get('/list/:y(\\d{4})', function(req, res, next){
-  db.query('CALL tt_hu_list_months(?)', [req.params.y], function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_list_months(?)'), [req.params.y], function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
        res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
@@ -115,7 +120,7 @@ router.get('/list/:y(\\d{4})', function(req, res, next){
 
 /* For the tree of HUs - days */
 router.get('/list/:ym(\\d{6})', function(req, res, next){
-  db.query('CALL tt_hu_list_days(?)', [req.params.ym], function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_list_days(?)'), [req.params.ym], function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
        res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
@@ -126,7 +131,7 @@ router.get('/list/:ym(\\d{6})', function(req, res, next){
 
 /* For the tree of HUs - orders */
 router.get('/orders/:ymd(\\d{8})', function(req, res, next){
-  db.query('CALL tt_hu_orders(?)', [req.params.ymd], function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_orders(?)'), [req.params.ymd], function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
        res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
@@ -137,7 +142,7 @@ router.get('/orders/:ymd(\\d{8})', function(req, res, next){
 
 /* For the tree of HUs - HUs */
 router.get('/proc_lists/:idorder(\\d+$)', function(req, res, next){
-  db.query('CALL tt_hu_proc_lists(?)', [req.params.idorder], function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_proc_lists(?)'), [req.params.idorder], function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
        res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
@@ -170,7 +175,7 @@ router.post('/', function(req, res, next) {
     qtyOnList = qty;
   }
   qtyOnList = Math.min(qtyOnList, qty);
-  db.query('CALL tt_hu_create_order(?, ?, ?, ?, ?, ?, ?, ?)',
+  db.query(queryOptions('CALL tt_hu_create_order(?, ?, ?, ?, ?, ?, ?, ?)'),
     [input.order, order2, description, dtarget, input.idproduct, input.idproduct_grp, qty, qtyOnList],
     function(err, rows) {
     if (err)
@@ -181,7 +186,7 @@ router.post('/', function(req, res, next) {
 });
 
 router.delete('/:idorder(\\d+$)', function(req, res, next) {
-  db.query('CALL tt_hu_delete_order(?)', [req.params.idorder], function(err, rows, fields){
+  db.query(queryOptions('CALL tt_hu_delete_order(?)'), [req.params.idorder], function(err, rows, fields){
     res.setHeader('Content-Type', 'application/json');
     if (err) 
       res.status(500).send(JSON.stringify({Result: 'ERROR', Message:  JSON.stringify(err)}));
