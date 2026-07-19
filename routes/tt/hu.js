@@ -40,9 +40,11 @@ router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(r
 
         var result = {
           /* Order info */
-          order_name  : orderRows[0].o_name,
-          order_name2 : orderRows[0].o_name2,
-          order_qty   : orderRows[0].o_qty ,
+          order_name       : orderRows[0].o_name,
+          order_name2      : orderRows[0].o_name2,
+          order_description: orderRows[0].o_description,
+          order_dtarget    : orderRows[0].o_dtarget,
+          order_qty        : orderRows[0].o_qty ,
 
           /* Product info */
           product_nr  : orderRows[0].p_nr  ,
@@ -149,6 +151,8 @@ router.post('/', function(req, res, next) {
   let qty = Number(input.qty);
   let qtyOnList = Number(input.qtyOnList);
   let order2 = String(input.order2 || '');
+  let description = String(input.description || '');
+  let dtarget = input.dtarget || null;
 
   res.setHeader('Content-Type', 'application/json');
   if (order2.length > 100) {
@@ -156,12 +160,17 @@ router.post('/', function(req, res, next) {
     return;
   }
 
+  if (description.length > 200) {
+    res.status(400).send(JSON.stringify({Result: 'ERROR', Message: 'Description must be 200 characters or less.'}));
+    return;
+  }
+
   if (!qtyOnList || qtyOnList <= 0) {
     qtyOnList = qty;
   }
   qtyOnList = Math.min(qtyOnList, qty);
-  db.query('CALL tt_hu_create_order(?, ?, ?, ?, ?, ?)',
-    [input.order, order2, input.idproduct, input.idproduct_grp, qty, qtyOnList],
+  db.query('CALL tt_hu_create_order(?, ?, ?, ?, ?, ?, ?, ?)',
+    [input.order, order2, description, dtarget, input.idproduct, input.idproduct_grp, qty, qtyOnList],
     function(err, rows) {
     if (err)
       res.status(500).send(JSON.stringify({Result: 'ERROR', Message: JSON.stringify(err)}));

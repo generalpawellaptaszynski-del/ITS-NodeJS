@@ -17,8 +17,8 @@ function buildGroupFilterClause(alias, term, params) {
     return "";
   }
 
-  params.push(likePattern(term), likePattern(term));
-  return "(" + alias + ".nr LIKE ? OR " + alias + ".name LIKE ?)";
+  params.push(likePattern(term));
+  return alias + ".nr LIKE ?";
 }
 
 function buildProductFilterClause(alias, term, params) {
@@ -26,8 +26,8 @@ function buildProductFilterClause(alias, term, params) {
     return "";
   }
 
-  params.push(likePattern(term), likePattern(term));
-  return "(" + alias + ".nr LIKE ? OR " + alias + ".name LIKE ?)";
+  params.push(likePattern(term));
+  return alias + ".nr LIKE ?";
 }
 
 /* Tree: product | step */

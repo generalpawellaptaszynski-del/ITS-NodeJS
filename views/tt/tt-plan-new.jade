@@ -9,7 +9,7 @@ block content
     div.product-toolbar-filter
       span.product-toolbar-label Filter
       button#btnResetFltr(type="button") Reset
-      input#plan_name.clsFltrInput(type="text" autocomplete="off" title="Type product group or step group, then press Enter or leave the field to apply" placeholder="Filter plan")
+      input#plan_name.clsFltrInput(type="text" autocomplete="off" title="Type product group number or step group, then press Enter or leave the field to apply" placeholder="Filter plan")
     div.product-toolbar-actions
       button#btnAddProductGrpNew.btnAdd.btn-new-group(type="button")
         span.btn-new-group-icon(aria-hidden="true")
@@ -26,7 +26,5 @@ block content
       input(type="hidden" id="productDialogParentKey")
       label(for="productDialogNr") Nr
       input(type="text" id="productDialogNr" autocomplete="off")
-      label(for="productDialogName") Name
-      input(type="text" id="productDialogName" autocomplete="off")
   script(src='../javascripts/its_tree_view.js')
   script(src='../javascripts/tt/tt-plan-new.js')

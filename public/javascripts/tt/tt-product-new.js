@@ -5,7 +5,8 @@ var suppressNextFilterBlurCommit = false;
 var editorState = {
   mode: "edit",
   node: null,
-  parentKey: "_"
+  parentKey: "_",
+  kind: "group"
 };
 
 $(function () {
@@ -234,7 +235,8 @@ function openDialogForEdit(node) {
   editorState = {
     mode: "edit",
     node: node,
-    parentKey: null
+    parentKey: null,
+    kind: nodeUsesName(node) ? "subgroup" : (node.folder ? "group" : "product")
   };
 
   setDialogTitle("Edit", node, "Edit");
@@ -243,6 +245,7 @@ function openDialogForEdit(node) {
   $("#productDialogParentKey").val("");
   $("#productDialogNr").val(node.title || "");
   $("#productDialogName").val((node.data && node.data.name) || "");
+  updateDialogNameVisibility();
   $("#productDialog").dialog("open");
 }
 
@@ -263,7 +266,8 @@ function openDialogForAdd(kind, parentNode) {
   editorState = {
     mode: "add",
     node: null,
-    parentKey: parentKey
+    parentKey: parentKey,
+    kind: kind
   };
 
   $("#productDialog").dialog("option", "title", title);
@@ -272,13 +276,31 @@ function openDialogForAdd(kind, parentNode) {
   $("#productDialogParentKey").val(parentKey);
   $("#productDialogNr").val("");
   $("#productDialogName").val("");
+  updateDialogNameVisibility();
   $("#productDialog").dialog("open");
+}
+
+function nodeUsesName(node) {
+  return !!(node && node.folder && node.level === 1);
+}
+
+function dialogUsesName() {
+  if (editorState.mode === "edit") {
+    return nodeUsesName(editorState.node);
+  }
+  return editorState.kind === "subgroup";
+}
+
+function updateDialogNameVisibility() {
+  var usesName = dialogUsesName();
+  $("#productDialogNameLabel, #productDialogName").toggle(usesName);
+  $("#productDialogName").prop("required", usesName);
 }
 
 function syncDialogButtons() {
   var hasNr = String($("#productDialogNr").val() || "").trim().length > 0;
   var hasName = String($("#productDialogName").val() || "").trim().length > 0;
-  var enabled = hasNr && hasName;
+  var enabled = hasNr && (!dialogUsesName() || hasName);
   var $save = $("#productDialog").dialog("widget").find(".ui-dialog-buttonpane button:contains('Save')");
   if ($save.length) {
     $save.button("option", "disabled", !enabled);
@@ -288,11 +310,15 @@ function syncDialogButtons() {
 function saveDialog() {
   var nr = String($("#productDialogNr").val() || "").trim();
   var name = String($("#productDialogName").val() || "").trim();
-  if (!nr || !name) {
+  var usesName = dialogUsesName();
+  if (!nr || (usesName && !name)) {
     return;
   }
 
-  var data = { nr: nr, name: name };
+  var data = { nr: nr };
+  if (usesName) {
+    data.name = name;
+  }
   var isEdit = $("#productDialogMode").val() === "edit";
   var targetUrl = isEdit ? (url + "/" + $("#productDialogKey").val()) : (url + "/" + $("#productDialogParentKey").val());
   var method = isEdit ? "PUT" : "POST";

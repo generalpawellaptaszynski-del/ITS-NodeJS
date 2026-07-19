@@ -8,9 +8,15 @@ html
 
     style.
       .error {color:red;}
-      p {font-size: 16px; color: #464646; text-align: left; margin: 0;}
-      .product {font-weight: bold; color: black; text-align: center;}
-      .order {color: black; text-align: center;}
+      p {font-size: 13px; color: #464646; text-align: left; margin: 0; line-height: 1.2;}
+      .product {font-weight: bold; color: black;}
+      .order {color: black;}
+      .doc-block {padding: 0 8px;}
+      .doc-line {display: flex; gap: 6px; align-items: baseline;}
+      .doc-label {min-width: 72px; color: #606060; font-size: 11px; text-transform: uppercase;}
+      .doc-value {font-weight: bold; color: #000;}
+      .doc-muted {color: #464646; font-size: 12px;}
+      .doc-description .doc-value {font-weight: normal;}
       th, td {height: 30px;}
       th {font-size: 14px; font-weight: bold; background-color: azure;}
       td {font-size: 14px;}
@@ -46,10 +52,30 @@ html
               p #{hu_data.hu_qty} pcs
             td.td_barcode: div.barcode!= hu_data.hu_barcode
             td.td_doc
-              p.order Нарачка бр. #{order_name} (#{order_qty} pcs)
-              p.order Налог бр. #{order_name2}
-              p.product #{product_nr} 
-              p.product #{product_name} 
+              .doc-block
+                p.order.doc-line
+                  span.doc-label Order
+                  span.doc-value #{order_name}
+                  span.doc-muted (#{order_qty} pcs)
+                if order_name2
+                  p.order.doc-line
+                    span.doc-label Ref/Tax
+                    span.doc-value #{order_name2}
+                if order_description
+                  p.order.doc-line.doc-description
+                    span.doc-label Description
+                    span.doc-value #{order_description}
+                if order_dtarget
+                  p.order.doc-line
+                    span.doc-label Target
+                    span.doc-value #{order_dtarget}
+                p.product.doc-line
+                  span.doc-label Product
+                  span.doc-value #{product_nr}
+                if product_name
+                  p.product.doc-line
+                    span.doc-label Type
+                    span.doc-value #{product_name}
             td.td_logo
               img.logo(src="../../../images/images-user/logo.png")
 

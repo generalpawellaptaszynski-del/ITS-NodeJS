@@ -10,13 +10,16 @@ block content
         .form-group
           label(for='order2') Reference/Tax Number
           .tt-field-control
-            input(type="text" placeholder="Enter reference" aria-describedby="order2-error")#order2.form-control
+            input(type="text" maxlength="100" placeholder="Enter reference" aria-describedby="order2-error")#order2.form-control
             .tt-field-error#order2-error(role="alert" aria-live="polite")
         .form-group
           label(for='dtarget') Target Date
           input(type="date")#dtarget.form-control
 
       .form-row
+        .form-group
+          label(for='description') Description
+          input(type="text" maxlength="200" placeholder="Enter description")#description.form-control
         .form-group.product-select
           label(for='product-grp') Product Group
           select#product-grp.form-control

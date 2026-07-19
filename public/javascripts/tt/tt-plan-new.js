@@ -256,7 +256,6 @@ function openGroupDialogForEdit(node) {
   $("#productDialogKey").val(node.key);
   $("#productDialogParentKey").val("");
   $("#productDialogNr").val(node.title || "");
-  $("#productDialogName").val((node.data && node.data.name) || "");
   $("#productDialog").dialog("open");
 }
 
@@ -272,7 +271,6 @@ function openGroupDialogForAdd() {
   $("#productDialogKey").val("");
   $("#productDialogParentKey").val("_");
   $("#productDialogNr").val("");
-  $("#productDialogName").val("");
   $("#productDialog").dialog("open");
 }
 
@@ -287,12 +285,11 @@ function syncDialogButtons() {
 
 function saveGroupDialog() {
   var nr = String($("#productDialogNr").val() || "").trim();
-  var name = String($("#productDialogName").val() || "").trim();
   if (!nr) {
     return;
   }
 
-  var data = { nr: nr, name: name };
+  var data = { nr: nr };
   var isEdit = $("#productDialogMode").val() === "edit";
   var targetUrl = isEdit ? (groupUrl + "/" + $("#productDialogKey").val()) : (groupUrl + "/_");
   var method = isEdit ? "PUT" : "POST";

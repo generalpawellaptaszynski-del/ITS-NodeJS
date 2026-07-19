@@ -108,6 +108,105 @@ BEGIN
 END//
 DELIMITER ;
 
+SET @drop_object_sql = (
+  SELECT IF(COUNT(*) > 0, 'DROP PROCEDURE `_add_column_if_missing`', 'SELECT 1')
+    FROM information_schema.routines
+   WHERE routine_schema = DATABASE()
+     AND routine_name = '_add_column_if_missing'
+     AND routine_type = 'PROCEDURE'
+);
+PREPARE drop_object_stmt FROM @drop_object_sql;
+EXECUTE drop_object_stmt;
+DEALLOCATE PREPARE drop_object_stmt;
+SET @drop_object_sql = NULL;
+DELIMITER //
+CREATE PROCEDURE _add_column_if_missing(
+  IN p_table_name VARCHAR(64),
+  IN p_column_name VARCHAR(64),
+  IN p_column_definition TEXT
+)
+BEGIN
+  DECLARE v_table_exists INT DEFAULT 0;
+  DECLARE v_column_exists INT DEFAULT 0;
+
+  SELECT COUNT(*)
+    INTO v_table_exists
+    FROM information_schema.tables
+   WHERE table_schema = DATABASE()
+     AND table_name = p_table_name
+     AND table_type = 'BASE TABLE';
+
+  SELECT COUNT(*)
+    INTO v_column_exists
+    FROM information_schema.columns
+   WHERE table_schema = DATABASE()
+     AND table_name = p_table_name
+     AND column_name = p_column_name;
+
+  IF v_table_exists > 0 AND v_column_exists = 0 THEN
+    SET @add_column_sql = CONCAT(
+      'ALTER TABLE `', REPLACE(p_table_name, '`', '``'),
+      '` ADD COLUMN `', REPLACE(p_column_name, '`', '``'),
+      '` ', p_column_definition
+    );
+    PREPARE add_column_stmt FROM @add_column_sql;
+    EXECUTE add_column_stmt;
+    DEALLOCATE PREPARE add_column_stmt;
+  END IF;
+END//
+DELIMITER ;
+
+SET @drop_object_sql = (
+  SELECT IF(COUNT(*) > 0, 'DROP PROCEDURE `_drop_column_if_exists`', 'SELECT 1')
+    FROM information_schema.routines
+   WHERE routine_schema = DATABASE()
+     AND routine_name = '_drop_column_if_exists'
+     AND routine_type = 'PROCEDURE'
+);
+PREPARE drop_object_stmt FROM @drop_object_sql;
+EXECUTE drop_object_stmt;
+DEALLOCATE PREPARE drop_object_stmt;
+SET @drop_object_sql = NULL;
+DELIMITER //
+CREATE PROCEDURE _drop_column_if_exists(
+  IN p_table_name VARCHAR(64),
+  IN p_column_name VARCHAR(64)
+)
+BEGIN
+  DECLARE v_table_exists INT DEFAULT 0;
+  DECLARE v_column_exists INT DEFAULT 0;
+
+  SELECT COUNT(*)
+    INTO v_table_exists
+    FROM information_schema.tables
+   WHERE table_schema = DATABASE()
+     AND table_name = p_table_name
+     AND table_type = 'BASE TABLE';
+
+  SELECT COUNT(*)
+    INTO v_column_exists
+    FROM information_schema.columns
+   WHERE table_schema = DATABASE()
+     AND table_name = p_table_name
+     AND column_name = p_column_name;
+
+  IF v_table_exists > 0 AND v_column_exists > 0 THEN
+    SET @drop_column_sql = CONCAT(
+      'ALTER TABLE `', REPLACE(p_table_name, '`', '``'),
+      '` DROP COLUMN `', REPLACE(p_column_name, '`', '``'), '`'
+    );
+    PREPARE drop_column_stmt FROM @drop_column_sql;
+    EXECUTE drop_column_stmt;
+    DEALLOCATE PREPARE drop_column_stmt;
+  END IF;
+END//
+DELIMITER ;
+
+CALL _add_column_if_missing('order', 'description', 'NVARCHAR(200) NULL AFTER `name2`');
+CALL _add_column_if_missing('order', 'dtarget', 'DATE NULL AFTER `qty`');
+CALL _drop_column_if_exists('product', 'name');
+CALL _drop_column_if_exists('product_grp', 'name');
+
 CALL _add_index_if_missing('tt_event', 'idx_tt_event_hu_step_dtend', '`hu`, `idstep`, `dtend`');
 CALL _add_index_if_missing('tt_event', 'idx_tt_event_hu_dt', '`hu`, `dt`');
 CALL _add_index_if_missing('tt_event', 'idx_tt_event_dt', '`dt`');
@@ -163,6 +262,30 @@ SET @drop_object_sql = (
     FROM information_schema.routines
    WHERE routine_schema = DATABASE()
      AND routine_name = '_add_index_if_missing'
+     AND routine_type = 'PROCEDURE'
+);
+PREPARE drop_object_stmt FROM @drop_object_sql;
+EXECUTE drop_object_stmt;
+DEALLOCATE PREPARE drop_object_stmt;
+SET @drop_object_sql = NULL;
+
+SET @drop_object_sql = (
+  SELECT IF(COUNT(*) > 0, 'DROP PROCEDURE `_add_column_if_missing`', 'SELECT 1')
+    FROM information_schema.routines
+   WHERE routine_schema = DATABASE()
+     AND routine_name = '_add_column_if_missing'
+     AND routine_type = 'PROCEDURE'
+);
+PREPARE drop_object_stmt FROM @drop_object_sql;
+EXECUTE drop_object_stmt;
+DEALLOCATE PREPARE drop_object_stmt;
+SET @drop_object_sql = NULL;
+
+SET @drop_object_sql = (
+  SELECT IF(COUNT(*) > 0, 'DROP PROCEDURE `_drop_column_if_exists`', 'SELECT 1')
+    FROM information_schema.routines
+   WHERE routine_schema = DATABASE()
+     AND routine_name = '_drop_column_if_exists'
      AND routine_type = 'PROCEDURE'
 );
 PREPARE drop_object_stmt FROM @drop_object_sql;
@@ -715,7 +838,7 @@ BEGIN
     ADD INDEX idx_tmp_tt_current_event_hu_dt (hu, dt);
 
   SELECT CONCAT(o.name, ' (', DATE_FORMAT(o.d, '%d-%m-%Y'), IFNULL(CONCAT(' Delivery ', DATE_FORMAT(o.dtarget, '%d-%m-%Y')), ''), ')') AS `order`,
-         CONCAT(pg.nr, '-', ps.nr, '-', p.nr, ' ', p.name, ' - ', o.qty, ' pcs') AS product,
+         CONCAT(pg.nr, '-', ps.nr, '-', p.nr, IFNULL(CONCAT(' ', NULLIF(ps.name, '')), ''), ' - ', o.qty, ' pcs') AS product,
          CONCAT(hs.hu, ': ', hs.step_grp, ' - ', hs.qty, ' pcs') AS hu,
          os.order_complete,
          hs.hu_complete,
@@ -945,6 +1068,8 @@ DELIMITER //
 CREATE PROCEDURE tt_hu_create_order(
   IN p_order VARCHAR(255),
   IN p_order2 VARCHAR(255),
+  IN p_description NVARCHAR(200),
+  IN p_dtarget DATE,
   IN p_idproduct INT,
   IN p_idproduct_grp INT,
   IN p_qty DECIMAL(18,6),
@@ -967,7 +1092,8 @@ BEGIN
   END IF;
 
   START TRANSACTION;
-  INSERT INTO `order` (name, name2, idproduct, qty) VALUES (p_order, p_order2, p_idproduct, p_qty);
+  INSERT INTO `order` (name, name2, description, idproduct, qty, dtarget)
+  VALUES (p_order, p_order2, p_description, p_idproduct, p_qty, p_dtarget);
   SET v_idorder = LAST_INSERT_ID();
 
   OPEN cur;
@@ -1021,9 +1147,13 @@ BEGIN
     SELECT idorder INTO v_idorder FROM hu WHERE hu = p_hu LIMIT 1;
   END IF;
 
-  SELECT DISTINCT o.name AS o_name, o.name2 AS o_name2, o.qty AS o_qty,
+  SELECT DISTINCT o.name AS o_name,
+         o.name2 AS o_name2,
+         o.description AS o_description,
+         DATE_FORMAT(o.dtarget, '%d-%m-%Y') AS o_dtarget,
+         o.qty AS o_qty,
          CONCAT(pg.nr, '-', ps.nr, '-', pr.nr) AS p_nr,
-         CONCAT(pg.name, ' ', ps.name, ' ', pr.name) AS p_name
+         NULLIF(ps.name, '') AS p_name
     FROM `order` o
     JOIN product pr ON pr.id = o.idproduct
     JOIN product_sgrp ps ON ps.id = pr.idproduct_sgrp
@@ -1486,14 +1616,13 @@ BEGIN
   IF p_idproduct_grp IS NULL AND p_filter IS NOT NULL THEN
     SELECT CONCAT(pl.idproduct_grp, '/', pl.idstep_grp) AS `key`,
            pl.qty AS title,
-           CONCAT_WS('/', pg.nr, pg.name, sg.nr, sg.name) AS displayName,
+           CONCAT_WS('/', pg.nr, sg.nr, sg.name) AS displayName,
            FALSE AS folder,
            FALSE AS lazy
       FROM plan pl
      INNER JOIN product_grp pg ON pg.id = pl.idproduct_grp
      INNER JOIN step_grp sg ON sg.id = pl.idstep_grp
      WHERE UPPER(CONVERT(pg.nr USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
-        OR UPPER(CONVERT(pg.name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR UPPER(CONVERT(sg.nr USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR UPPER(CONVERT(sg.name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR CAST(pl.qty AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', CONVERT(p_filter USING utf8mb4), '%') COLLATE utf8mb4_unicode_ci
@@ -1512,10 +1641,9 @@ BEGIN
   ELSE
     SELECT id AS `key`,
            nr AS title,
-           CONCAT(nr, ' ', name) AS displayName,
+           nr AS displayName,
            id,
            nr,
-           name,
            TRUE AS folder,
            TRUE AS lazy,
            (SELECT COUNT(*) FROM plan pl WHERE pl.idproduct_grp = product_grp.id) AS count
@@ -1769,14 +1897,14 @@ CREATE PROCEDURE tt_product_insert(
 )
 BEGIN
   IF p_idsgrp IS NOT NULL THEN
-    INSERT INTO product (idproduct_sgrp, nr, name)
-    VALUES (p_idsgrp, p_nr, p_name);
+    INSERT INTO product (idproduct_sgrp, nr)
+    VALUES (p_idsgrp, p_nr);
   ELSEIF p_idgrp IS NOT NULL THEN
     INSERT INTO product_sgrp (idproduct_grp, nr, name)
     VALUES (p_idgrp, p_nr, p_name);
   ELSE
-    INSERT INTO product_grp (nr, name)
-    VALUES (p_nr, p_name);
+    INSERT INTO product_grp (nr)
+    VALUES (p_nr);
   END IF;
 END//
 
@@ -1798,25 +1926,21 @@ BEGIN
     SELECT CONCAT(pg.id, '/', sg.id, '/', p.id) AS `key`,
            p.nr AS title,
            CONCAT_WS('/', pg.nr, sg.nr, p.nr) AS nrPath,
-           p.name,
-           CONCAT_WS('/', pg.name, sg.name, p.name) AS displayName,
+           CONCAT_WS('/', pg.nr, CONCAT_WS(' ', sg.nr, sg.name), p.nr) AS displayName,
            FALSE AS folder,
            FALSE AS lazy
       FROM product p
       LEFT JOIN product_sgrp sg ON p.idproduct_sgrp = sg.id
       LEFT JOIN product_grp pg ON sg.idproduct_grp = pg.id
      WHERE UPPER(CONVERT(pg.nr USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
-        OR UPPER(CONVERT(pg.name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR UPPER(CONVERT(sg.nr USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR UPPER(CONVERT(sg.name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
         OR UPPER(CONVERT(p.nr USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
-        OR UPPER(CONVERT(p.name USING utf8mb4)) COLLATE utf8mb4_unicode_ci LIKE CONCAT('%', UPPER(CONVERT(p_filter USING utf8mb4)), '%') COLLATE utf8mb4_unicode_ci
      ORDER BY displayName, title;
   ELSEIF p_idgrp IS NOT NULL AND p_idsgrp IS NOT NULL THEN
     SELECT CONCAT(p_idgrp, '/', p_idsgrp, '/', p.id) AS `key`,
            p.nr AS title,
-           CONCAT_WS('/', g.nr, s.nr, p.nr) AS nrPath,
-           p.name
+           CONCAT_WS('/', g.nr, s.nr, p.nr) AS nrPath
       FROM product p
       LEFT JOIN product_sgrp s ON p.idproduct_sgrp = s.id
       LEFT JOIN product_grp g ON s.idproduct_grp = g.id
@@ -1840,7 +1964,6 @@ BEGIN
            nr AS nrPath,
            id,
            nr,
-           name,
            TRUE AS folder,
            TRUE AS lazy,
            (SELECT COUNT(*) FROM product_sgrp s WHERE s.idproduct_grp = product_grp.id) AS count
@@ -1867,13 +1990,13 @@ CREATE PROCEDURE tt_product_update(
 )
 BEGIN
   IF p_id IS NOT NULL THEN
-    UPDATE product SET nr = p_nr, name = p_name WHERE id > 0 AND id = p_id;
+    UPDATE product SET nr = p_nr WHERE id > 0 AND id = p_id;
     SELECT * FROM product WHERE id = p_id;
   ELSEIF p_idsgrp IS NOT NULL THEN
     UPDATE product_sgrp SET nr = p_nr, name = p_name WHERE id > 0 AND id = p_idsgrp;
     SELECT * FROM product_sgrp WHERE id = p_idsgrp;
   ELSE
-    UPDATE product_grp SET nr = p_nr, name = p_name WHERE id > 0 AND id = p_idgrp;
+    UPDATE product_grp SET nr = p_nr WHERE id > 0 AND id = p_idgrp;
     SELECT * FROM product_grp WHERE id = p_idgrp;
   END IF;
 END//
@@ -1929,7 +2052,7 @@ BEGIN
   SELECT CONCAT(DATE_FORMAT(e.dt,'%Y%m%d%H%i%s'), '-', e.idplace, '-', e.idstep, '-', e.idworker, '-', e.hu, '-', e.idproduct_grp) AS `key`,
          DATE_FORMAT(e.dt,'%H:%i:%s') AS title, FALSE AS folder, FALSE AS lazy, IFNULL(e.sec, 0) AS sec,
          CONCAT(pl.id, ' - ', pl.name) AS place, CONCAT(st.nr, ' - ', st.name) AS step,
-         CONCAT(w.nr, ' - ', w.name) AS worker, CONCAT(pg.nr, ' - ', pg.name) AS product_grp, e.hu AS hu
+         CONCAT(w.nr, ' - ', w.name) AS worker, pg.nr AS product_grp, e.hu AS hu
     FROM tt_v_event e
     LEFT JOIN tt_place pl ON pl.id = e.idplace
     LEFT JOIN step st ON st.id = e.idstep
@@ -1955,7 +2078,7 @@ CREATE PROCEDURE tt_report_detailed_xlsx(IN p_date VARCHAR(10), IN p_dfrom VARCH
 BEGIN
   SELECT DATE_FORMAT(e.dt,'%d-%m-%Y') AS d, DATE_FORMAT(e.dt,'%H:%i:%s') AS t, IFNULL(e.sec, 0) AS sec,
          CONCAT(pl.id, ' - ', pl.name) AS place, CONCAT(st.nr, ' - ', st.name) AS step,
-         CONCAT(w.nr, ' - ', w.name) AS worker, CONCAT(pg.nr, ' - ', pg.name) AS product_grp, e.hu AS hu
+         CONCAT(w.nr, ' - ', w.name) AS worker, pg.nr AS product_grp, e.hu AS hu
     FROM tt_v_event e
     LEFT JOIN tt_place pl ON pl.id = e.idplace
     LEFT JOIN step st ON st.id = e.idstep
@@ -1988,7 +2111,7 @@ DROP PROCEDURE IF EXISTS tt_report_dict_product_groups;
 DELIMITER //
 CREATE PROCEDURE tt_report_dict_product_groups()
 BEGIN
-  SELECT id, CONCAT(nr, ' - ', name) AS fullname FROM product_grp WHERE id > 0 ORDER BY nr;
+  SELECT id, nr AS fullname FROM product_grp WHERE id > 0 ORDER BY nr;
 END//
 DELIMITER ;
 

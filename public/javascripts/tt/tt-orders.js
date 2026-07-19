@@ -183,6 +183,7 @@ function newOrderData() {
   return {
     order: $("#order").val(), 
     order2: $("#order2").val(), 
+    description: $("#description").val(),
     idproduct: $("#product").val().split("/")[2], // val = 1/2/3
     idproduct_grp: $("#product-grp").val(), 
     qty: $("#qty").val(), 
@@ -268,6 +269,7 @@ function delOrder(idorder, order) {
 function resetOrder() {
   $('#order').val('');
   $('#order2').val('');
+  $('#description').val('');
   validateOrder2();
   $('#dtarget').val('');
   $('#product-grp').prop('selectedIndex', 0);
