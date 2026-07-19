@@ -54,22 +54,18 @@ html
             td.td_doc
               .doc-block
                 p.order.doc-line
+                  span.doc-label Date
+                  span.doc-value #{order_date || '-'}
+                  span.doc-label Target
+                  span.doc-value #{order_dtarget || '-'}
+                p.order.doc-line
                   span.doc-label Order
                   span.doc-value #{order_name}
                   span.doc-muted (#{order_qty} pcs)
-                p.order.doc-line
-                  span.doc-label Date
-                  span.doc-value #{order_date || '-'}
                 if order_name2
                   p.order.doc-line
                     span.doc-label Ref/Tax
                     span.doc-value #{order_name2}
-                p.order.doc-line
-                  span.doc-label Target
-                  span.doc-value #{order_dtarget || '-'}
-                p.order.doc-line.doc-description
-                  span.doc-label Description
-                  span.doc-value #{order_description || '-'}
                 p.product.doc-line
                   span.doc-label Product
                   span.doc-value #{product_nr}
@@ -77,6 +73,9 @@ html
                   p.product.doc-line
                     span.doc-label Type
                     span.doc-value #{product_name}
+                p.order.doc-line.doc-description
+                  span.doc-label Description
+                  span.doc-value #{order_description || '-'}
             td.td_logo
               img.logo(src="../../../images/images-user/logo.png")
 
