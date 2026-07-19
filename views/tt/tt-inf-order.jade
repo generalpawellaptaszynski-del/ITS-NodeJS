@@ -19,7 +19,7 @@ html
       .doc-line {display: flex; gap: 6px; align-items: baseline;}
       .doc-label {min-width: 72px; color: #606060; font-size: 11px; text-transform: uppercase;}
       .doc-value {font-weight: bold; color: #000;}
-      .order-name {display: inline-block; padding: 1px 5px; border: 1px solid #d3b334; background: #fff2a8; font-weight: 800;}
+      .order-name {display: inline-block; padding: 1px 6px; border: 2px solid #000; border-bottom-width: 4px; background: #f2f2f2; font-weight: 800; letter-spacing: 0;}
       .doc-muted {color: #464646; font-size: 12px;}
       .doc-description .doc-value {font-weight: normal;}
       th, td {height: 30px;}
@@ -60,7 +60,7 @@ html
               .doc-block
                 p.order.doc-line
                   span.doc-label Date
-                  span.doc-value #{order_date || '-'}
+                  span.doc-value #{order_date || '-'}#{order_dtarget ? '-' + order_dtarget : ''}
                 p.order.doc-line
                   span.doc-label Order
                   span.doc-value.order-name #{order_name}
@@ -78,20 +78,13 @@ html
                     span.doc-value #{product_name}
             td.td_logo
               img.logo(src="../../../images/images-user/logo.png")
-        if order_dtarget || order_description
+        if order_description
           table.doc-extra-table
             tr
-              td.td_quantity
-              td.td_extra_doc(colspan=3)
+              td.td_extra_doc(colspan=4)
                 .doc-extra
-                  if order_dtarget
-                    p.order.doc-line
-                      span.doc-label Target date
-                      span.doc-value #{order_dtarget}
-                  if order_description
-                    p.order.doc-line.doc-description
-                      span.doc-label Description
-                      span.doc-value #{order_description}
+                  p.order.doc-line.doc-description
+                    span.doc-value #{order_description}
 
         //- var step_id = 0
 
