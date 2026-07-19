@@ -13,8 +13,9 @@ html
       .order {color: black;}
       .doc-block {padding: 0 8px;}
       .doc-extra {padding: 4px 8px 0;}
-      .doc-extra-table {margin-top: 2px;}
+      .doc-extra-table {margin-top: 2px; table-layout: fixed;}
       .doc-extra-table td {height: auto;}
+      .td_extra_doc {text-align: left;}
       .doc-line {display: flex; gap: 6px; align-items: baseline;}
       .doc-label {min-width: 72px; color: #606060; font-size: 11px; text-transform: uppercase;}
       .doc-value {font-weight: bold; color: #000;}
@@ -81,7 +82,7 @@ html
           table.doc-extra-table
             tr
               td.td_quantity
-              td
+              td.td_extra_doc(colspan=3)
                 .doc-extra
                   if order_dtarget
                     p.order.doc-line
