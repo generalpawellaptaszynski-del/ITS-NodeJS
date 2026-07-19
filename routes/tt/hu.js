@@ -43,6 +43,7 @@ router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(r
           order_name       : orderRows[0].o_name,
           order_name2      : orderRows[0].o_name2,
           order_description: orderRows[0].o_description,
+          order_date       : orderRows[0].o_d,
           order_dtarget    : orderRows[0].o_dtarget,
           order_qty        : orderRows[0].o_qty ,
 

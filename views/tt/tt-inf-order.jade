@@ -57,18 +57,19 @@ html
                   span.doc-label Order
                   span.doc-value #{order_name}
                   span.doc-muted (#{order_qty} pcs)
+                p.order.doc-line
+                  span.doc-label Date
+                  span.doc-value #{order_date || '-'}
                 if order_name2
                   p.order.doc-line
                     span.doc-label Ref/Tax
                     span.doc-value #{order_name2}
-                if order_description
-                  p.order.doc-line.doc-description
-                    span.doc-label Description
-                    span.doc-value #{order_description}
-                if order_dtarget
-                  p.order.doc-line
-                    span.doc-label Target
-                    span.doc-value #{order_dtarget}
+                p.order.doc-line
+                  span.doc-label Target
+                  span.doc-value #{order_dtarget || '-'}
+                p.order.doc-line.doc-description
+                  span.doc-label Description
+                  span.doc-value #{order_description || '-'}
                 p.product.doc-line
                   span.doc-label Product
                   span.doc-value #{product_nr}

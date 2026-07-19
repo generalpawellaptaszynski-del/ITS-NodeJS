@@ -16,10 +16,12 @@ block content
           label(for='dtarget') Target Date
           input(type="date")#dtarget.form-control
 
-      .form-row
+      .form-row.tt-orders-description-row
         .form-group
           label(for='description') Description
-          input(type="text" maxlength="200" placeholder="Enter description")#description.form-control
+          input(type="text" maxlength="200" placeholder="Enter description (Latin/Cyrillic)")#description.form-control
+
+      .form-row
         .form-group.product-select
           label(for='product-grp') Product Group
           select#product-grp.form-control

@@ -1150,6 +1150,7 @@ BEGIN
   SELECT DISTINCT o.name AS o_name,
          o.name2 AS o_name2,
          o.description AS o_description,
+         DATE_FORMAT(o.d, '%d-%m-%Y') AS o_d,
          DATE_FORMAT(o.dtarget, '%d-%m-%Y') AS o_dtarget,
          o.qty AS o_qty,
          CONCAT(pg.nr, '-', ps.nr, '-', pr.nr) AS p_nr,
