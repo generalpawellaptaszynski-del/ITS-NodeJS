@@ -43,13 +43,15 @@ router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(r
       return;
     }
 
+    function renderOrderInfo(orderFallback) {
+        orderFallback = orderFallback || {};
         var result = {
           /* Order info */
           order_name       : orderRows[0].o_name,
           order_name2      : orderRows[0].o_name2,
-          order_description: orderRows[0].o_description,
-          order_date       : orderRows[0].o_d,
-          order_dtarget    : orderRows[0].o_dtarget,
+          order_description: orderRows[0].o_description || orderFallback.order_description,
+          order_date       : orderRows[0].o_d || orderFallback.order_date,
+          order_dtarget    : orderRows[0].o_dtarget || orderFallback.order_dtarget,
           order_qty        : orderRows[0].o_qty ,
 
           /* Product info */
@@ -93,6 +95,26 @@ router.get(['/order/:idorder(\\d+$)', '/:hu(\\d+$)', '/:hu(-\\d+$)'], function(r
         res.status(200);
         res.setHeader('Content-Type', 'text/html');
         res.send(html);
+    }
+
+    if (orderRows[0].o_d) {
+      renderOrderInfo();
+      return;
+    }
+
+    db.query(
+      queryOptions("SELECT DATE_FORMAT(o.d, '%d-%m-%Y') AS order_date, DATE_FORMAT(o.dtarget, '%d-%m-%Y') AS order_dtarget, o.description AS order_description FROM `order` o LEFT JOIN hu h ON h.idorder = o.id WHERE (? IS NOT NULL AND o.id = ?) OR (? IS NOT NULL AND h.hu = ?) LIMIT 1"),
+      [req.params.idorder || null, req.params.idorder || null, req.params.hu || null, req.params.hu || null],
+      function(orderErr, orderDateRows) {
+        if (orderErr) {
+          console.error('[tt/hu] Order date fallback query failed:', orderErr);
+          renderOrderInfo();
+          return;
+        }
+
+        renderOrderInfo(orderDateRows && orderDateRows[0]);
+      }
+    );
   });
 });
 
